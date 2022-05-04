@@ -30,7 +30,7 @@
             <input type="checkbox" v-model="todo.status" />
             <input
               ref="valueInput"
-              @dblclick="editTask(index)"
+              @dblclick="editTask(todo, index)"
               type="text"
               :value="todo.name"
               :class="{
@@ -164,41 +164,45 @@ export default defineComponent({
       this.todos.splice(index, 1);
     },
 
-    editTask(index: number) {
-      const array = this.$refs.valueInput as [];
-      const input = array[index] as HTMLInputElement;
-      const task = input.parentElement as HTMLDivElement;
-      const task2 = task.parentElement as HTMLLIElement;
-      const taskClose = task2.lastElementChild as HTMLDivElement;
-      const inputCheck = task.firstElementChild as HTMLInputElement;
-      taskClose.style.opacity = "0";
-      inputCheck.style.opacity = "0";
-      input.style.border = "1px solid #999";
-      input.readOnly = false;
-      input.setSelectionRange(input.value.length, input.value.length);
-      if (input.classList.contains("checked")) {
-        input.classList.remove("checked");
-      }
+    editTask(todo: Todo, index: number) {
+      this.childEditTask(todo, index, "0", "1px solid #999", false);
     },
 
     doneEdit(todo: Todo, index: number) {
       if (!this.editTask) return;
+      this.childEditTask(todo, index, "1", "none", true);
+    },
+
+    childEditTask(
+      todo: Todo,
+      index: number,
+      opacity: string,
+      border: string,
+      readTrueFalse: boolean
+    ) {
       const array = this.$refs.valueInput as [];
       const input = array[index] as HTMLInputElement;
       const task = input.parentElement as HTMLDivElement;
       const task2 = task.parentElement as HTMLLIElement;
       const taskClose = task2.lastElementChild as HTMLDivElement;
       const inputCheck = task.firstElementChild as HTMLInputElement;
-      taskClose.style.opacity = "1";
-      inputCheck.style.opacity = "1";
-      input.style.border = "none";
-      input.readOnly = true;
-      todo.name = input.value.trim();
-      if (!todo.name) {
-        this.todos.splice(this.todos.indexOf(todo), 1);
-      }
-      if (todo.status === true) {
-        input.classList.add("checked");
+      taskClose.style.opacity = opacity;
+      inputCheck.style.opacity = opacity;
+      input.style.border = border;
+      input.readOnly = readTrueFalse;
+      if (readTrueFalse === true) {
+        todo.name = input.value.trim();
+        if (!todo.name) {
+          this.todos.splice(this.todos.indexOf(todo), 1);
+        }
+        if (todo.status === true) {
+          input.classList.add("checked");
+        }
+      } else {
+        input.setSelectionRange(input.value.length, input.value.length);
+        if (input.classList.contains("checked")) {
+          input.classList.remove("checked");
+        }
       }
     },
 
